@@ -50,8 +50,13 @@ Pour recevoir les messages directement : crée un formulaire gratuit sur [formsp
 
 ## Mettre en ligne
 
-```bash
-npm run build    # génère le dossier dist/
-```
+Le site est déployé automatiquement sur **GitHub Pages** à chaque `git push` sur la branche `main`
+(workflow `.github/workflows/deploy.yml`).
 
-Le dossier `dist/` peut être déposé tel quel sur **Netlify** (glisser-déposer), **Vercel** ou **GitHub Pages**.
+Première fois uniquement : dans le dépôt GitHub, **Settings → Pages → Source : GitHub Actions**.
+
+Pour tester la version de production en local :
+
+```bash
+npm run build && npm run preview
+```
