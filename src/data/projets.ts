@@ -175,20 +175,6 @@ export const projets: Projet[] = [
     image: 'images/projets/enquete-musique.jpg',
     documents: [{ label: 'Analyse des questionnaires (PDF)', url: 'docs/enquete-musique-questionnaires.pdf' }],
   },
-  // ---------------- Perso ----------------
-  {
-    id: 'portfolio',
-    titre: 'Ce portfolio',
-    origine: 'perso',
-    categories: ['Applications & dataviz'],
-    annee: '2026',
-    resume: 'Portfolio responsive dont le thème change selon le parcours consulté.',
-    description:
-      "Site conçu à partir d'une maquette Google Stitch puis développé en React 19, TypeScript et Tailwind CSS, avec des animations Framer Motion et les chartes graphiques ISIS et USPN.",
-    role: 'Conception et développement',
-    stack: ['React', 'TypeScript', 'Tailwind CSS', 'Framer Motion'],
-    image: '',
-  },
 ]
 
 export const categoriesProjet: CategorieProjet[] = [
