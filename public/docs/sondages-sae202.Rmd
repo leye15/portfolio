@@ -1,0 +1,568 @@
+---
+---
+title: "SAE: Sondages simples"
+author: "LEYE_Mariama, SIVAKUMAR_Surenthini"
+date: "RESSOURCES: Statistiques inférentielles et Probabilités"
+output:
+  html_document:
+    toc: yes
+    toc_depth: 2
+  word_document:
+    toc: yes
+    toc_depth: 2
+  pdf_document:
+    toc: yes
+    toc_depth: 2
+    ignore_errors: true
+subtitle: ""
+header-includes: \usepackage[french]{babel}
+---
+
+---
+
+
+
+# 2. Sondages
+
+Le sondage est une méthode de la statistique inférentielle. Il a pour objectif d'évaluer les paramètres ou les proportions de certaines caractéristiques d'une population cible.
+
+**Un exemple:** combien de fois les français agés de 18 à 30 ans ont-ils votés en moyenne, à quels types d'élection et pour quels partis ? La population cible est "les français agées de 18 à 30 ans". Les paramètres et proportions sont le nombre moyen de votes auxquels les indidividus ont pris part, la proportion de votes à telles ou telles élections ou pour tels ou tels partis.
+
+Cependant, les données ont un coût et la plupart du temps, il n'est pas possible d'effectuer un complet recensement des caractéristiques de la population. On parle de sondage lorsque l'évaluation se base sur une partie limitée de la population cible. Cette sous-partie est appelé l'échantillon. L'étude de l'échantillon permet d'inférer les caractéristiques de la population cible. Dans le cas d'une moyenne ou d'une proportion, l'échantillon nous permet de calculer une estimation et les marges d'erreurs probables de cette estimation. C'est ce qu'on appelle un intervalle de confiance.
+
+![*Echantillonnage*](echantillon-population.png){width="70%"}
+
+**Quel âge ont les mères ou les pères à la naissance de leur enfant (en 2019) ?** C'est la principale question à laquelle il vous sera demander d'apporter une réponse statistique. Plutôt que de vous envoyer interroger au hasard des centaines d'individus dans la rue ou par téléphone, nous avons choisi de vous faire travailler à partir d'une base de données de l'Insee fournissant la liste anonymisée des [naissances en 2019](https://www.insee.fr/fr/statistiques/4768335?sommaire=4768339#consulter)). Bien sûr cette base contient la totalité de la population et il serait plus efficace, du point de vue de la qualité des résultats, d'effectuer une analyse descriptive de toute la base. **Mais ce n'est pas le but. Ce projet se fixe pour objectif la mise en oeuvre de sondage et l'étude de la qualité des sondages effectués. Cela nécessite de considérer que l'on a un accès partiel à la base de donnée: l'échantillon tiré .**
+
+Notez qu'il est très pratique de posséder l'intégralité des données de la population cible. Les estimations faîtes sur la base de l'échantillon tiré peuvent être comparer avec les vrais paramètres de la population.
+
+Si vous avez téléchargé la base de données, vous pouvez la charger sous forme de data frame avec la ligne suivante:
+
+```{r,eval=FALSE}
+data=read.csv('"C:/Users/maria/Downloads/sae_202-20260402T175241Z-3-001/sae_202/FD_NAIS_2019.csv" , sep=";")
+# description des caractéristiques de la base de données
+#description=read.csv("varmod_NAIS_2019.csv",sep=";")
+```
+
+## 2.1 Génération d'échantillons
+
+Créer une fonction `echantillonnage` permettant d'extraire de la base de données des échantillons de la taille que l'on souhaite. Les tirages aléatoires pour constituer ces échantillons doivent être **uniformes et indépendants**.
+
+La fonction `echantillonnage` prendra en paramètres d'entrée un vecteur contenant les valeurs d'une caractéristique pour une large population et la taille de l'échantillon que l'on souhaite extraire de cette population. Elle renverra un vecteur contenant les valeurs de la caractéristique associées à cette échantillon.
+## 2.2 Estimations ponctuelles
+
+
+1.  Pour chacune des caractéristiques:
+
+a)  l'âge de la mère :
+
+
+construire un échantillon avec votre fonction `echantillonnage` et proposer une estimation ponctuelle de la caractéristique à évaluer.
+
+2.  Donner une estimation ponctuelle non biaisée de la variance de l'âge de de la mère.
+
+
+
+```{r}
+# Echantillon de l'age des Meres
+
+
+echantillonnageM <- function(data, n) {
+if (n > nrow(data)) stop("La taille de l'échantillon ne peut pas être supérieure à la taille de la population.")
+  echantillon <- sample(data$AGEMERE, n, replace = FALSE)
+  return(echantillon)
+}
+
+# Fonction pour calculer la moyenne
+
+moyenne <- function(echantillon) {
+  return(mean(echantillon))
+}
+
+#estimation de la variance
+
+variance_non_biaisee <- function(echantillon) {
+  return(var(echantillon))
+}
+
+
+# Fonction pour calculer un intervalle de confiance
+intervalle_confiance <- function(echantillon, conf_level = 0.95) {
+  n <- length(echantillon)
+  mean_echantillon <- mean(echantillon)
+  sd_echantillon <- sd(echantillon)
+  erreur_standard <- sd_echantillon / sqrt(n)
+  
+  alpha <- 1 - conf_level
+  t_value <- qt(1 - alpha / 2, df = n - 1)
+  
+  marge_erreur <- t_value * erreur_standard
+  intervalle <- c(mean_echantillon - marge_erreur, mean_echantillon + marge_erreur)
+  
+  return(intervalle)
+}
+
+
+effectuer_echantillonnage_avec_intervalle <- function(data, taille_echantillon, conf_level = 0.95) {
+  
+  # Tirer des échantillons
+  set.seed(123)  # Pour rendre les résultats reproductibles
+  echantillon_ages_meres <- echantillonnageM(data, taille_echantillon)
+    
+  # Calculer les estimations ponctuelles
+  estimation_age_moyen_meres <- moyenne(echantillon_ages_meres)
+ 
+  #estimation par la variance
+  estimation_age_variance<-variance_non_biaisee(echantillon_ages_meres)
+  
+  #Calcul de l'interval de confiance
+   intervalle_confiance_meres <- intervalle_confiance(echantillon_ages_meres, conf_level)
+   
+   #afficher les resultats
+  print("Échantillon des âges des mères :")
+  print(echantillon_ages_meres)
+  print(paste("Estimation de l'âge moyen des mères :", estimation_age_moyen_meres))
+  print(paste("estimation de l'âge des méres par la variance :",estimation_age_variance))
+  print(paste("Intervalle de confiance de l'âge moyen des mères :", intervalle_confiance_meres))
+}
+
+taille_echantillon <- 100
+
+# Appel de la fonction principale avec la taille de l'échantillon souhaitée
+effectuer_echantillonnage_avec_intervalle(data, taille_echantillon,conf_level = 0.95)
+
+```
+
+
+b)  l'âge du père :
+
+```{r}
+# Fonction d'échantillonnage pour les pères
+echantillonnageP <- function(data, n) {
+  if (n > nrow(data)) stop("La taille de l'échantillon ne peut pas être supérieure à la taille de la population.")
+  echantillon <- sample(data$AGEPERE, n, replace = FALSE)
+  return(echantillon)
+}
+
+
+
+# Fonction pour calculer la moyenne
+moyenne <- function(echantillon) {
+  return(mean(echantillon))
+}
+
+
+
+
+#estimation de l'âge des péres par la variance
+variance_non_biaisee <- function(echantillon) {
+  return(var(echantillon))
+}
+
+
+
+# Fonction pour calculer un intervalle de confiance
+intervalle_confiance <- function(echantillon, conf_level = 0.95) {
+  n <- length(echantillon)
+  mean_echantillon <- mean(echantillon)
+  sd_echantillon <- sd(echantillon)
+  erreur_standard <- sd_echantillon / sqrt(n)
+  
+  alpha <- 1 - conf_level
+  t_value <- qt(1 - alpha / 2, df = n - 1)
+  
+  marge_erreur <- t_value * erreur_standard
+  intervalle <- c(mean_echantillon - marge_erreur, mean_echantillon + marge_erreur)
+  
+  return(intervalle)
+}
+
+
+
+# Fonction principale pour effectuer l'échantillonnage et calculer les estimations
+effectuer_echantillonnage_avec_intervalle <- function(data, taille_echantillon,conf_level=0.95){
+
+
+  # Tirer des échantillons
+  set.seed(123)  # Pour rendre les résultats reproductibles
+  
+  echantillon_ages_peres <- echantillonnageP(data, taille_echantillon)
+  
+  # Calculer les estimations ponctuelles
+ 
+  estimation_age_moyen_peres <- moyenne(echantillon_ages_peres)
+  
+  #calcul de l'estimation de l'âge des péres
+  estimation_var_peres<-variance_non_biaisee(echantillon_ages_peres)
+  
+  
+   #Calcul de l'interval de confiance
+   intervalle_confiance_peres <- intervalle_confiance(echantillon_ages_peres, conf_level)
+   
+  
+  
+  # Afficher les échantillons et les estimations ponctuelles
+  print("Échantillon des âges des pères :")
+  print(echantillon_ages_peres)
+  print(paste("Estimation de l'âge moyen des pères :", estimation_age_moyen_peres))
+  print(paste("esttimation de l'âge des péres par la variance :",estimation_var_peres))
+   print(paste("Intervalle de confiance de l'âge moyen des peres :", intervalle_confiance_peres))
+   
+}
+
+# Utilisation de la fonction principale
+# Définir la taille de l'échantillon
+
+taille_echantillon <- 100# Vous pouvez changer cette valeur à tout moment
+
+# Appel de la fonction principale avec la taille de l'échantillon souhaitée
+
+effectuer_echantillonnage_avec_intervalle(data, taille_echantillon,conf_level = 0.95)
+
+```
+
+
+
+## 2.3 Estimations par intervalles de confiance
+
+1.  Créer une fonction fournissant un intervalle de confiance pour chacune des  caractéristiques du paragraphe précédent (2.2). Le niveau de confiance `conf_level` pourra être choisi par l'utilisateur  (paramètre de la fonction). L'intervalle sera centré sur l'estimation ponctuelle.
+
+pour calculer l'interval de confiance on a choisi la variance et la moyenne déjà calculée en 2.2 et on a pris comme quantile nous avons choisi 0.95.
+
+
+
+2. Comment la longueur de l'intervalle de confiance varie-t-elle quand on change le niveau de confiance ? Même question quand la taille de l'échantillon augmente.
+
+
+
+# quand la taille de l'échantillon augmente l'intervalle de confiance diminue.
+# quand le niveau de confiance augmente l'intervalle de confiance augmente.
+
+
+
+
+2.  Un intervalle de confiance pour une moyenne n'est pas nécessairement centré sur la moyenne d'échantillon $\overline{X}_n$; par exemple s'il est important de ne pas sous-estimer la moyenne, on peut préférer un intervalle de confiance borné seulement à gauche, c'est à dire de la forme $[a;+\infty[$. Créer une nouvelle fonction qui renvoit un intervalle de confiance de la forme $[a;+\infty[$ et un autre de la forme $]-\infty;b]$ pour l'âge de la mère. **Vous veillerez à choisir convenablement les quantiles pour construire de tels intervalles de confiance.**
+
+#Pour deternimer un echantillon avec un intervalle de [a,inf] , il nous faut trouver le quantil correspondant (Q(1-apha(dans le cours la valeur c))) au lieu de 1-alpha/2.
+
+
+```{r}
+
+# Charger les packages nécessaires
+library(dplyr)
+
+# Fonction d'échantillonnage pour les pères
+echantillonnageM <- function(data, n) {
+  if (n > nrow(data)) stop("La taille de l'échantillon ne peut pas être supérieure à la taille de la population.")
+  echantillon <- sample(data$AGEMERE, n, replace = FALSE)
+  return(echantillon)
+}
+
+# Fonction pour calculer la moyenne
+moyenne <- function(echantillon) {
+  return(mean(echantillon))
+}
+
+# Fonction pour calculer la variance non biaisée
+variance_non_biaisee <- function(echantillon) {
+  return(var(echantillon))
+}
+
+# Fonction pour calculer un intervalle de confiance unilatéral inférieur
+intervalle_confiance_unilateral <- function(echantillon, conf_level = 0.95) {
+  n <- length(echantillon)
+  mean_echantillon <- mean(echantillon)
+  sd_echantillon <- sd(echantillon)
+  erreur_standard <- sd_echantillon / sqrt(n)
+  
+  alpha <- 1 - conf_level
+  t_value <- qt(1 - alpha, df = n - 1)  # Valeur t pour une queue
+  
+  marge_erreur <- t_value * erreur_standard
+  borne_inferieure <- mean_echantillon - marge_erreur
+  
+  intervalle <- c(borne_inferieure, Inf)
+  
+  return(intervalle)
+}
+
+# Fonction principale pour effectuer l'échantillonnage et calculer les estimations
+effectuer_echantillonnage_avec_intervalle <- function(data, taille_echantillon, conf_level = 0.95) {
+  # Vérifier la taille de l'échantillon
+  if (taille_echantillon > nrow(data)) {
+    stop("La taille de l'échantillon ne peut pas être supérieure à la taille de la population.")
+  }
+  
+  # Tirer des échantillons
+  set.seed(123)  # Pour rendre les résultats reproductibles
+  echantillon_ages_meres <- echantillonnageM(data, taille_echantillon)
+  
+  # Calculer les estimations ponctuelles
+  estimation_age_moyen_meres <- moyenne(echantillon_ages_meres)
+  estimation_var_meres <- variance_non_biaisee(echantillon_ages_meres)
+  
+  # Calculer l'intervalle de confiance unilatéral inférieur
+  intervalle_confiance_meres <- intervalle_confiance_unilateral(echantillon_ages_meres, conf_level)
+  
+  # Afficher les échantillons et les estimations ponctuelles
+  cat("Échantillon des âges des pères :\n")
+  print(echantillon_ages_meres)
+  cat(paste("Estimation de l'âge moyen des pères :", estimation_age_moyen_meres, "\n"))
+  cat(paste("Estimation de l'âge des pères par la variance :", estimation_var_meres, "\n"))
+  cat(paste("Intervalle de confiance unilatéral inférieur de l'âge moyen des pères :", intervalle_confiance_meres, "\n"))
+}
+
+# Utilisation de la fonction principale
+# Définir la taille de l'échantillon
+taille_echantillon <- 100 # Vous pouvez changer cette valeur à tout moment
+
+# Exemple d'objet 'data' pour test
+# data <- data.frame(AGEPERE = sample(25:55, 200, replace = TRUE))
+
+# Appel de la fonction principale avec la taille de l'échantillon souhaitée
+effectuer_echantillonnage_avec_intervalle(data, taille_echantillon, conf_level = 0.95)
+
+```
+
+
+
+
+#De même pour un intervalle de confiance de moins l'infini à une valeur b, on doit utiliser le quantil d'ordre apha(dans le cours la valeur c)
+
+
+
+
+```{r}
+
+# Charger les packages nécessaires
+library(dplyr)
+
+# Fonction d'échantillonnage pour les pères
+echantillonnageM <- function(data, n) {
+  if (n > nrow(data)) stop("La taille de l'échantillon ne peut pas être supérieure à la taille de la population.")
+  echantillon <- sample(data$AGEMERE, n, replace = FALSE)
+  return(echantillon)
+}
+
+# Fonction pour calculer la moyenne
+moyenne <- function(echantillon) {
+  return(mean(echantillon))
+}
+
+# Fonction pour calculer la variance non biaisée
+variance_non_biaisee <- function(echantillon) {
+  return(var(echantillon))
+}
+
+# Fonction pour calculer un intervalle de confiance unilatéral inférieur
+intervalle_confiance_unilateral <- function(echantillon, conf_level = 0.95) {
+  n <- length(echantillon)
+  mean_echantillon <- mean(echantillon)
+  sd_echantillon <- sd(echantillon)
+  erreur_standard <- sd_echantillon / sqrt(n)
+  
+  alpha <- 1 - conf_level
+  t_value <- qt(alpha, df = n - 1)  # Valeur t pour une queue
+  
+  marge_erreur <- t_value * erreur_standard
+  borne_superieur <- mean_echantillon - marge_erreur
+  
+  intervalle <- c(Inf,borne_superieur)
+  
+  return(intervalle)
+}
+
+# Fonction principale pour effectuer l'échantillonnage et calculer les estimations
+effectuer_echantillonnage_avec_intervalle <- function(data, taille_echantillon, conf_level = 0.95) {
+  # Vérifier la taille de l'échantillon
+  if (taille_echantillon > nrow(data)) {
+    stop("La taille de l'échantillon ne peut pas être supérieure à la taille de la population.")
+  }
+  
+  # Tirer des échantillons
+  set.seed(123)  # Pour rendre les résultats reproductibles
+  echantillon_ages_meres <- echantillonnageM(data, taille_echantillon)
+  
+  # Calculer les estimations ponctuelles
+  estimation_age_moyen_meres <- moyenne(echantillon_ages_meres)
+  estimation_var_meres <- variance_non_biaisee(echantillon_ages_meres)
+  
+  # Calculer l'intervalle de confiance unilatéral inférieur
+  intervalle_confiance_meres <- intervalle_confiance_unilateral(echantillon_ages_meres, conf_level)
+  
+  # Afficher les échantillons et les estimations ponctuelles
+  cat("Échantillon des âges des pères :\n")
+  print(echantillon_ages_meres)
+  cat(paste("Estimation de l'âge moyen des pères :", estimation_age_moyen_meres, "\n"))
+  cat(paste("Estimation de l'âge des pères par la variance :", estimation_var_meres, "\n"))
+  cat(paste("Intervalle de confiance unilatéral inférieur de l'âge moyen des pères :", intervalle_confiance_meres, "\n"))
+}
+
+# Utilisation de la fonction principale
+# Définir la taille de l'échantillon
+taille_echantillon <- 100 # Vous pouvez changer cette valeur à tout moment
+
+# Exemple d'objet 'data' pour test
+# data <- data.frame(AGEPERE = sample(25:55, 200, replace = TRUE))
+
+# Appel de la fonction principale avec la taille de l'échantillon souhaitée
+effectuer_echantillonnage_avec_intervalle(data, taille_echantillon, conf_level = 0.95)
+
+```
+
+
+
+##2.4 Etude de la qualité des sondages##
+
+Dans cette partie, on cherche à étudier la qualité des marges d’erreurs des intervalles de confiance.
+pour cela on a fait un code qui génére plusieurs echantillons de même taille pour savoir la valeur théorique pouvant s’approcher de la proportion des intervalles de confiance contenant la vraie moyenne.
+
+```{r}
+# Charger les packages nécessaires
+library(dplyr)
+
+# Fonction d'échantillonnage pour les mères
+echantillonnageM <- function(data, n) {
+  if (n > nrow(data)) stop("La taille de l'échantillon ne peut pas être supérieure à la taille de la population.")
+  echantillon <- sample(data$AGEMERE, n, replace = FALSE)
+  return(echantillon)
+}
+
+# Fonction pour calculer la moyenne
+moyenne <- function(echantillon) {
+  return(mean(echantillon))
+}
+
+# Fonction pour calculer un intervalle de confiance unilatéral inférieur
+intervalle_confiance_unilateral <- function(echantillon, conf_level = 0.95) {
+  n <- length(echantillon)
+  mean_echantillon <- mean(echantillon)
+  sd_echantillon <- sd(echantillon)
+  erreur_standard <- sd_echantillon / sqrt(n)
+  
+  alpha <- 1 - conf_level
+  t_value <- qt(1 - alpha/2, df = n - 1)  # Valeur t pour une queue
+  
+  marge_erreur <- t_value * erreur_standard
+  borne_inferieure <- mean_echantillon - marge_erreur
+  borne_superieur<-mean_echantillon + marge_erreur
+  intervalle <- c(borne_inferieure,borne_superieur)
+  
+  return(intervalle)
+}
+
+# Fonction principale pour réaliser l'étude de la qualité des sondages
+etude_qualite_sondages <- function(data, taille_echantillon, conf_level = 0.95, n_sondages = 1000) {
+  # Calculer la vraie moyenne de la population
+  vraie_moyenne <- mean(data$AGEMERE)
+  
+  # Initialiser un compteur pour les intervalles contenant la vraie moyenne
+  compteur_intervalles_valides <- 0
+  
+  # Initialiser une liste pour stocker les échantillons et leurs intervalles de confiance
+  resultats <- list()
+  
+  # Répéter le processus pour un grand nombre de sondages
+  for (i in 1:n_sondages) {
+    echantillon_ages_meres <- echantillonnageM(data, taille_echantillon)
+    intervalle_confiance <- intervalle_confiance_unilateral(echantillon_ages_meres, conf_level)
+    
+    # Vérifier si la vraie moyenne est dans l'intervalle de confiance
+    if (vraie_moyenne >= intervalle_confiance[1]) {
+      compteur_intervalles_valides <- compteur_intervalles_valides + 1
+    }
+    
+    # Stocker les résultats
+    resultats[[i]] <- list(
+      echantillon = echantillon_ages_meres,
+      intervalle_confiance = intervalle_confiance
+    )
+  }
+  
+  # Calculer la proportion d'intervalles contenant la vraie moyenne
+  proportion_intervalles_valides <- compteur_intervalles_valides / n_sondages
+  
+  # Afficher les résultats
+  for (i in 1:n_sondages) {
+    cat(paste("Échantillon", i, ":\n"))
+    print(resultats[[i]]$echantillon)
+    cat(paste("Intervalle de confiance :", resultats[[i]]$intervalle_confiance, "\n\n"))
+  }
+  
+  cat(paste("Proportion d'intervalles de confiance contenant la vraie moyenne :", proportion_intervalles_valides, "\n"))
+}
+
+# Utilisation de la fonction pour étudier la qualité des sondages
+# Exemple d'objet 'data' pour test
+# data <- data.frame(AGEPERE = sample(25:55, 200, replace = TRUE))
+
+# Définir les paramètres
+taille_echantillon <- 100  # Vous pouvez changer cette valeur à tout moment
+conf_level <- 0.95  # Niveau de confiance
+n_sondages <- 1000  # Nombre de sondages
+
+# Appel de la fonction pour réaliser l'étude
+etude_qualite_sondages(data, taille_echantillon, conf_level, n_sondages)
+```
+
+
+La génération de ces intyervalles montre que plus le nombre de sondage grand plus la proportion des intervalles contenent la vraie moyenne augmente.
+donc Plus le nombre de sondages est élevé, plus la proportion obtenue sera proche de la valeur théorique. Par exemple, avec 1000 sondages, les résultats seront plus fiables qu'avec seulement 100 sondages.
+
+
+
+## 2.5 Naît-il plus de filles ou de garçons ?
+
+
+Pour cette partie, il s'agit de faire un pas de côté. **Désormais, la population cible n'est plus celle de la base de données,** mais une population plus grande et théorique dont aurait été extraite la base de données. Par exemple, les naissances dans le monde en 2019, ou les naissances en France depuis 1 siècle, ou encore toutes les naissances possible d'êtres humains. **De plus, on ne dispose plus que d'un seul échantillon de très grande taille: notre base de données.**
+
+Le problème part de l'observation suivante: parmi les enfants naît en 2019, il y a légèrement plus d'enfants de sexe masculin que d'enfants de sexe féminin (variable `SEXE`). Serait-il raisonnable de penser que cette observation n'est pas dû au hasard, mais qu'elle traduit une forme de vérité potentiellement valable en d'autre temps et d'autres lieux: "les bébés humains sont plus souvent de sexe masculin"?
+
+Pour étudier ce problème, il faut utiliser le théorème suivant.
+
+**Théorème:** Soit $\overline{X}_n$ la moyenne empirique d'un $n$-échantillon de loi de Bernoulli $\mathcal{B}(p).$ On a: $$\dfrac{\sqrt{n}  (\overline{X}_n-p)}{\sqrt{p(1-p)}}\underset{n\rightarrow +\infty}{\overset{\mathcal{L}}\rightarrow} N(0,1)$$ Cela signifie que pour $n$ suffisamment grand ($n>100$), il est raisonnable d'approcher la distribution de la v.a. $\sqrt{\frac{n}{p(1-p)}}(\overline{X}_n-p)$ par une loi normale centrée réduite.
+
+Pour déterminer un intervalle de confiance de la probabilité qu'un nouveau né soit de sexe masculin.On va se servir du théoréme de loi normale centrée réduite en Faîsant  varier le niveau de confiance: 
+1-$\alpha=0.95
+2-0.99,
+3-0.999  
+```{r}
+
+
+# Calculer la proportion de nouveau-nés de sexe masculin
+proportion_masculin <- mean(data$SEXE == 1)
+
+# Fonction pour calculer un intervalle de confiance pour une proportion
+intervalle_confiance_proportion <- function(proportion, n, conf_level) {
+  alpha <- 1 - conf_level
+  z_value <- qnorm(1 - alpha / 2)
+  erreur_standard <- sqrt((proportion * (1 - proportion)) / n)
+  marge_erreur <- z_value * erreur_standard
+  intervalle <- c(proportion - marge_erreur, proportion + marge_erreur)
+  return(intervalle)
+}
+
+# Taille de l'échantillon
+n <- nrow(data)
+
+# Niveaux de confiance
+niveaux_confiance <- c(0.95, 0.99, 0.999)
+
+#afficher la moyenne
+cat(paste("Proportion de nouveau-nés de sexe masculin :", proportion_masculin, "\n"))
+
+# Calculer et afficher les intervalles de confiance pour chaque niveau de confiance
+for (conf_level in niveaux_confiance) {
+  intervalle <- intervalle_confiance_proportion(proportion_masculin, n, conf_level)
+  cat(paste("Intervalle de confiance pour un niveau de confiance de", conf_level, ":", intervalle, "\n"))
+}
+```
+
+
+Pour un niveau de confiance de 95%, la proportion de nouveau-nés masculins se situe entre environ 0.50995 et 0.51221.
+Pour un niveau de confiance de 99%, la proportion de nouveau-nés masculins se situe entre environ 0.50960 et 0.51256.
+Cela signifie que nous sommes respectivement à 95% et 99% confiants que la vraie proportion de nouveau-nés masculins se situe dans ces intervalles. La proportion empirique que vous avez fournie (0.51108) est comprise dans ces intervalles, ce qui est cohérent avec nos estimations.
+
+En termes simples, cela suggère que dans une population théorique plus large, il est très probable que la proportion de nouveau-nés masculins se situe quelque part entre les valeurs indiquées dans les intervalles de confiance correspondants. Plus le niveau de confiance est élevé, plus l'intervalle de confiance est large, ce qui reflète une plus grande certitude dans notre estimation.
+donc on peut dire que dans une population donnée, un lieu donné est presque sûr d'avoir plus 1/2 enfant masculin.
+

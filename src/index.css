@@ -1,0 +1,181 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   Design system repris de la maquette Stitch (DESIGN.md)
+   Thème clair uniquement. Les couleurs d'accent changent selon le
+   parcours via l'attribut data-theme (neutral | isis | but | bac).
+------------------------------------------------------------------- */
+
+/* Accents dynamiques : "inline" pour que les utilitaires lisent directement
+   les variables du thème actif (data-theme) au lieu d'une valeur figée */
+@theme inline {
+  --color-primary: var(--t-primary);
+  --color-primary-strong: var(--t-primary-strong);
+  --color-secondary: var(--t-secondary);
+  --color-accent: var(--t-accent);
+  --color-tint: var(--t-tint);
+  --color-tint-strong: var(--t-tint-strong);
+}
+
+@theme {
+  --font-sans: "Plus Jakarta Sans Variable", "Plus Jakarta Sans", Arial, sans-serif;
+
+  /* Base neutre (commune à tous les thèmes) */
+  --color-canvas: #fafafd;
+  --color-surface: #ffffff;
+  --color-line: #eceaf3;
+  --color-ink: #1e1b3a;
+  --color-body: #4a4766;
+  --color-muted: #8a87a0;
+
+
+  /* Couleurs fixes des écoles (badges, timeline…) */
+  --color-isis: #7c50de;
+  --color-isis-deep: #2f0d73;
+  --color-isis-coral: #f56960;
+  --color-isis-amber: #ffb43c;
+  --color-isis-teal: #3cbebe;
+  --color-isis-pink: #ac54c7;
+  --color-but: #293358;
+  --color-but-gold: #ad947e;
+  --color-iut-teal: #5fc1ca;
+  --color-bac: #2b4c9b;
+
+  --shadow-card: 0 8px 24px rgba(30, 27, 58, 0.06);
+  --shadow-card-hover: 0 16px 36px rgba(30, 27, 58, 0.1);
+  --shadow-modal: 0 24px 48px rgba(30, 27, 58, 0.14);
+}
+
+:root,
+[data-theme="neutral"] {
+  --t-primary: #5b3fc4;
+  --t-primary-strong: #4321ac;
+  --t-secondary: #2b4c9b;
+  --t-accent: #3cbebe;
+  --t-tint: #f4f2fc;
+  --t-tint-strong: #e9e3fb;
+  --t-blob-1: #e9e3fb;
+  --t-blob-2: #e3eaf8;
+  --t-blob-3: #fff1dc;
+}
+
+[data-theme="isis"] {
+  --t-primary: #7c50de;
+  --t-primary-strong: #2f0d73;
+  --t-secondary: #ac54c7;
+  --t-accent: #3cbebe;
+  --t-tint: #f3effc;
+  --t-tint-strong: #e6dcfa;
+  --t-blob-1: #ede6fc;
+  --t-blob-2: #fce9e7;
+  --t-blob-3: #e2f6f6;
+}
+
+/* Charte Université Sorbonne Paris Nord / IUT de Villetaneuse */
+[data-theme="but"] {
+  --t-primary: #354878;
+  --t-primary-strong: #293358;
+  --t-secondary: #8b7d6d;
+  --t-accent: #ad947e;
+  --t-tint: #eff1f7;
+  --t-tint-strong: #e0e4f0;
+  --t-blob-1: #e4e8f3;
+  --t-blob-2: #f5efe8;
+  --t-blob-3: #e3f4f6;
+}
+
+[data-theme="bac"] {
+  --t-primary: #2b4c9b;
+  --t-primary-strong: #1f3a7a;
+  --t-secondary: #3cbebe;
+  --t-accent: #ffb43c;
+  --t-tint: #eff4fb;
+  --t-tint-strong: #dde8f7;
+  --t-blob-1: #e3eaf8;
+  --t-blob-2: #e2f6f6;
+  --t-blob-3: #fff4e0;
+}
+
+/* Transition douce des couleurs quand on change de thème */
+[data-theme] * {
+  transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+  transition-duration: 300ms;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  overflow-x: clip;
+  background: var(--color-canvas);
+  color: var(--color-body);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--t-tint-strong);
+  color: var(--color-ink);
+}
+
+@utility container-page {
+  @apply mx-auto w-full max-w-[1200px] px-5 md:px-8 lg:px-10;
+}
+@utility card {
+  @apply rounded-3xl border border-line bg-surface shadow-card;
+}
+@utility card-hover {
+  @apply transition-all duration-200 hover:-translate-y-1 hover:shadow-card-hover;
+}
+@utility eyebrow {
+  @apply text-[11px] font-bold uppercase tracking-[0.12em] text-primary;
+}
+@utility h1 {
+  @apply text-4xl font-extrabold tracking-[-0.03em] text-ink md:text-5xl;
+}
+@utility h2 {
+  @apply text-[26px] font-bold tracking-[-0.02em] text-ink md:text-[32px] md:leading-10;
+}
+@utility h3 {
+  @apply text-xl font-semibold tracking-[-0.01em] text-ink;
+}
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-[15px] font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20;
+}
+@utility btn-primary {
+  @apply btn bg-primary text-white shadow-[0_8px_20px_rgba(91,63,196,0.25)] hover:bg-primary-strong;
+}
+@utility btn-outline {
+  @apply btn border border-secondary text-secondary hover:bg-secondary/5;
+}
+@utility btn-ghost {
+  @apply btn text-body hover:bg-line hover:text-ink;
+}
+@utility chip {
+  @apply inline-flex items-center rounded-full px-3 py-1 text-[11px] font-bold tracking-[0.02em];
+}
+@utility input {
+  @apply w-full rounded-xl border border-line bg-canvas px-4 py-3 text-[15px] text-ink placeholder:text-muted outline-none transition focus:border-primary focus:bg-surface focus:ring-4 focus:ring-primary/10;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(64px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
