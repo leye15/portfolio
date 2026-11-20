@@ -12,7 +12,7 @@ export const profil: Profil = {
   presentation:
     "Passionnée de mathématiques depuis le collège, j'ai suivi un BUT Science des Données avant de rejoindre l'école d'ingénieurs ISIS. Mon stage sur un assistant d'aide à la décision clinique m'a convaincue : c'est à la rencontre de la data et de la santé que je veux travailler.",
   photo: 'images/photo.jpg',
-  email: 'mariamaleye49@gmail.com',
+  email: 'mariamaleye365@gmail.com',
   linkedin: 'https://www.linkedin.com/in/mariama-leye/',
   github: 'https://github.com/leye15',
   cv: 'cv/CV_stage_Mariama_LEYE.pdf',
